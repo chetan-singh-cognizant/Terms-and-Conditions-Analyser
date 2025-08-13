@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms & Conditions Insight Analyzer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <style>
+        :root {
+            --bg-gradient-light-start: #667eea;
+            --bg-gradient-light-end: #764ba2;
+            --text-color-light: #333;
+            --container-bg-light: #ffffff;
+            --textarea-border-light: #d1d5db;
+            --textarea-text-light: #4b5563;
+            --results-bg-light: #f9fafb;
+            --results-border-light: #e5e7eb;
+            --heading-color-light: #1f2937;
+            --subheading-color-light: #374151;
+            --code-bg-light: #e0e7ff;
+            --code-border-light: #8b5cf6;
+            --disclaimer-color-light: #6b7280;
+            --error-bg-light: #fef2f2;
+            --error-border-light: #fca5a5;
+            --error-text-light: #dc2626;
+            --button-text-light: #ffffff;
+            --dropzone-bg-light: #f8fafc;
+            --dropzone-border-light: #e2e8f0;
+        }
+
+        html[data-theme='dark'] {
+            --bg-gradient-dark-start: #1a202c;
+            --bg-gradient-dark-end: #2d3748;
+            --text-color-dark: #e2e8f0;
+            --container-bg-dark: #2d3748;
+            --textarea-border-dark: #4a5568;
+            --textarea-text-dark: #e2e8f0;
+            --results-bg-dark: #1a202c;
+            --results-border-dark: #4a5568;
+            --heading-color-dark: #f7fafc;
+            --subheading-color-dark: #cbd5e0;
+            --code-bg-dark: #4a5568;
+            --code-border-dark: #8b5cf6;
+            --disclaimer-color-dark: #a0aec0;
+            --error-bg-dark: #450a0a;
+            --error-border-dark: #dc2626;
+            --error-text-dark: #fca5a5;
+            --button-text-dark: #ffffff;
+            --dropzone-bg-dark: #1a202c;
+            --dropzone-border-dark: #4a5568;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-light-start) 0%, var(--bg-gradient-light-end) 100%);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-color-light);
+            transition: background 0.5s ease, color 0.5s ease;
+        }
+        html[data-theme='dark'] body {
+            background: linear-gradient(135deg, var(--bg-gradient-dark-start) 0%, var(--bg-gradient-dark-end) 100%);
+            color: var(--text-color-dark);
+        }
+
+        .container {
+            background-color: var(--container-bg-light);
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            width: 100%;
+            max-width: 950px;
+            margin-top: 30px;
+            animation: fadeIn 0.8s ease-out;
+            transition: background-color 0.5s ease, box-shadow 0.5s ease;
+            position: relative;
+        }
+        html[data-theme='dark'] .container {
+            background-color: var(--container-bg-dark);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dropzone {
+            background-color: var(--dropzone-bg-light);
+            border: 2px dashed var(--dropzone-border-light);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        html[data-theme='dark'] .dropzone {
+            background-color: var(--dropzone-bg-dark);
+            border-color: var(--dropzone-border-dark);
+        }
+        .dropzone:hover, .dropzone.dragover {
+            border-color: #8b5cf6;
+            background-color: rgba(139, 92, 246, 0.05);
+            transform: scale(1.01);
+        }
+        .dropzone.processing {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        .dropzone i {
+            font-size: 3rem;
+            color: #8b5cf6;
+            margin-bottom: 1rem;
+            display: block;
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        textarea {
+            min-height: 280px;
+            resize: vertical;
+            border: 1px solid var(--textarea-border-light);
+            background-color: var(--container-bg-light);
+            color: var(--textarea-text-light);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.5s ease, color 0.5s ease, transform 0.2s ease;
+        }
+        html[data-theme='dark'] textarea {
+            border: 1px solid var(--textarea-border-dark);
+            background-color: var(--container-bg-dark);
+            color: var(--textarea-text-dark);
+        }
+        textarea:focus {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.4);
+            transform: scale(1.01);
+        }
+        textarea:hover {
+            border-color: #a78bfa;
+            transform: scale(1.005);
+        }
+
+        textarea.error {
+            border-color: #dc2626;
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        button {
+            background: linear-gradient(45deg, #8b5cf6 0%, #6d28d9 100%);
+            color: var(--button-text-light);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        html[data-theme='dark'] button {
+            color: var(--button-text-dark);
+        }
+        
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        button:hover::before {
+            left: 100%;
+        }
+        
+        button:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.6);
+            background: linear-gradient(45deg, #6d28d9 0%, #8b5cf6 100%);
+        }
+        button:active {
+            transform: translateY(-1px) scale(0.98);
+            box-shadow: 0 3px 10px rgba(139, 92, 246, 0.3);
+            transition: all 0.1s ease;
+        }
+        
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.2);
+        }
+
+        .clear-btn {
+            background: linear-gradient(45deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            font-size: 0.875rem;
+            padding: 8px 16px;
+            margin-left: 10px;
+        }
+        .clear-btn:hover {
+            background: linear-gradient(45deg, #dc2626 0%, #ef4444 100%);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+        }
+
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-left-color: #fff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #loadingIndicator {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .file-processing {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #8b5cf6;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+
+        .markdown-content {
+            background-color: var(--results-bg-light);
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid var(--results-border-light);
+            line-height: 1.7;
+            color: var(--subheading-color-light);
+            transition: background-color 0.5s ease, border-color 0.5s ease, color 0.5s ease;
+        }
+        html[data-theme='dark'] .markdown-content {
+            background-color: var(--results-bg-dark);
+            border: 1px solid var(--results-border-dark);
+            color: var(--subheading-color-dark);
+        }
+
+        .markdown-content h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-top: 1.5rem;
+            margin-bottom: 1.2rem;
+            color: var(--heading-color-light);
+            border-bottom: 2px solid var(--results-border-light);
+            padding-bottom: 0.5rem;
+            transition: color 0.5s ease, border-color 0.5s ease;
+        }
+        html[data-theme='dark'] .markdown-content h2 {
+            color: var(--heading-color-dark);
+            border-bottom: 2px solid var(--results-border-dark);
+        }
+
+        .markdown-content h3 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+            color: var(--subheading-color-light);
+            transition: color 0.5s ease;
+        }
+        html[data-theme='dark'] .markdown-content h3 {
+            color: var(--subheading-color-dark);
+        }
+
+        .markdown-content p {
+            margin-bottom: 0.8rem;
+        }
+
+        .markdown-content ul {
+            list-style-type: none;
+            padding-left: 0;
+            margin-bottom: 1rem;
+        }
+        .markdown-content ul li {
+            position: relative;
+            padding-left: 25px;
+            margin-bottom: 0.6rem;
+            animation: slideInLeft 0.5s ease-out forwards;
+            opacity: 0;
+        }
+        .markdown-content ul li:nth-child(1) { animation-delay: 0.1s; }
+        .markdown-content ul li:nth-child(2) { animation-delay: 0.2s; }
+        .markdown-content ul li:nth-child(3) { animation-delay: 0.3s; }
+        .markdown-content ul li:nth-child(4) { animation-delay: 0.4s; }
+        .markdown-content ul li:nth-child(5) { animation-delay: 0.5s; }
+        
+        @keyframes slideInLeft {
+            from { 
+                opacity: 0; 
+                transform: translateX(-20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0); 
+            }
+        }
+        
+        .markdown-content ul li::before {
+            content: '👉';
+            position: absolute;
+            left: 0;
+            color: #8b5cf6;
+            font-size: 1.1em;
+            top: 0;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-3px);
+            }
+            60% {
+                transform: translateY(-2px);
+            }
+        }
+        
+        .markdown-content strong {
+            font-weight: 700;
+            color: var(--heading-color-light);
+            transition: color 0.5s ease;
+        }
+        html[data-theme='dark'] .markdown-content strong {
+            color: var(--heading-color-dark);
+        }
+
+        .markdown-content pre {
+            background-color: var(--code-bg-light);
+            color: var(--subheading-color-light);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+            font-size: 0.875rem;
+            margin-top: 0.8rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--code-border-light);
+            transition: background-color 0.5s ease, color 0.5s ease, transform 0.2s ease;
+        }
+        .markdown-content pre:hover {
+            transform: scale(1.01);
+        }
+        html[data-theme='dark'] .markdown-content pre {
+            background-color: var(--code-bg-dark);
+            color: var(--subheading-color-dark);
+            border-left: 4px solid var(--code-border-dark);
+        }
+
+        .disclaimer {
+            font-size: 0.9rem;
+            color: var(--disclaimer-color-light);
+            margin-top: 25px;
+            line-height: 1.5;
+            transition: color 0.5s ease;
+            animation: fadeInUp 0.8s ease-out;
+        }
+        html[data-theme='dark'] .disclaimer {
+            color: var(--disclaimer-color-dark);
+        }
+        .disclaimer strong {
+            color: #dc2626;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .error-message {
+            background-color: var(--error-bg-light);
+            border: 1px solid var(--error-border-light);
+            color: var(--error-text-light);
+            transition: background-color 0.5s ease, border-color 0.5s ease, color 0.5s ease;
+        }
+        html[data-theme='dark'] .error-message {
+            background-color: var(--error-bg-dark);
+            border: 1px solid var(--error-border-dark);
+            color: var(--error-text-dark);
+        }
+
+        #themeToggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            color:black;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease, transform 0.2s ease, color 0.3s ease;
+        }
+        #themeToggle:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1) rotate(15deg);
+        }
+        #themeToggle:active {
+            transform: scale(0.95) rotate(15deg);
+        }
+        html[data-theme='dark'] #themeToggle {
+            background-color: rgba(0, 0, 0, 0.3);
+            color: #f7fafc;
+        }
+        html[data-theme='dark'] #themeToggle:hover {
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        @keyframes slideInFromTop {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideInFromBottom {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-slide-in-top {
+            animation: slideInFromTop 0.6s ease-out forwards;
+        }
+
+        .animate-slide-in-bottom {
+            animation: slideInFromBottom 0.6s ease-out forwards;
+        }
+        
+        label {
+            transition: color 0.3s ease, transform 0.2s ease;
+            color: var(--subheading-color-light);
+        }
+        html[data-theme='dark'] label {
+            color: var(--subheading-color-dark);
+        }
+        label:hover {
+            color: #8b5cf6;
+            transform: translateX(2px);
+        }
+        
+        h1 {
+            animation: slideInFromTop 0.8s ease-out;
+            color: var(--heading-color-light);
+        }
+        html[data-theme='dark'] h1 {
+            color: var(--heading-color-dark);
+        }
+        
+        .subtitle {
+            animation: slideInFromTop 1s ease-out;
+            color: var(--subheading-color-light);
+        }
+        html[data-theme='dark'] .subtitle {
+            color: var(--subheading-color-dark);
+        }
+
+        .success-message {
+            background-color: #f0fdf4;
+            border: 1px solid #84cc16;
+            color: #16a34a;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 10px;
+            animation: slideInFromBottom 0.5s ease-out;
+        }
+        html[data-theme='dark'] .success-message {
+            background-color: #052e16;
+            border-color: #16a34a;
+            color: #4ade80;
+        }
+    </style>
+</head>
+<body>
+    <div class="container flex flex-col items-center">
+        <button id="themeToggle" aria-label="Toggle dark mode">
+            <i class="fa-solid fa-moon"></i>
+        </button>
+
+        <h1 class="text-5xl font-extrabold mb-4 text-center">
+            Terms and Conditions Insight Analyzer
+        </h1>
+        <p class="subtitle text-xl mb-10 text-center max-w-3xl">
+            Upload a PDF or text file, or paste the Terms and Conditions text below. Our AI will quickly highlight the most critical clauses and provide actionable insights you need to be aware of.
+        </p>
+
+        <div class="w-full mb-6">
+            <div id="dropzone" class="dropzone">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <h3 class="text-xl font-semibold mb-2">Drop your file here or click to upload</h3>
+                <p class="text-gray-600">Supports PDF and Text files (.pdf, .txt) up to 10MB</p>
+                <input type="file" id="fileInput" accept=".pdf,.txt" />
+            </div>
+            <div id="fileProcessing" class="file-processing hidden">
+                <div class="loading-spinner"></div>
+                <span id="processingText">Processing file...</span>
+            </div>
+            <div id="fileSuccess" class="success-message hidden">
+                <i class="fas fa-check-circle mr-2"></i>
+                <span id="successText">File uploaded successfully!</span>
+                <button id="clearFile" class="clear-btn">Clear File</button>
+            </div>
+        </div>
+
+        <div class="w-full mb-8">
+            <label for="termsInput" class="block text-lg font-semibold mb-3">
+                Or Paste Terms and Conditions Here:
+            </label>
+            <textarea
+                id="termsInput"
+                class="shadow-inner appearance-none border rounded-lg w-full py-4 px-5 leading-tight focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-300"
+                placeholder="e.g., 'By using this service, you agree to...' or paste the full text of a document."
+            ></textarea>
+        </div>
+
+        <button
+            id="analyzeButton"
+            class="font-bold py-4 px-8 rounded-full focus:outline-none focus:shadow-outline flex items-center justify-center gap-3 text-lg mb-10"
+        >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 002-2v2m-2 2h2m-2 2h2m-2 2h2m-2 2h2m-2 2h2"></path></svg>
+            Get Key Insights
+        </button>
+
+        <div id="loadingIndicator" class="hidden flex items-center justify-center gap-4 text-purple-600 mb-10">
+            <div class="loading-spinner"></div>
+            <p class="text-xl font-medium">Analyzing for insights, please wait...</p>
+        </div>
+
+        <div id="resultsArea" class="w-full hidden">
+            <h2 class="text-4xl font-bold mb-6">Key Insights & Attention Points:</h2>
+            <div id="analysisContent" class="markdown-content">
+            </div>
+            <p class="disclaimer text-center">
+                <strong class="text-red-600">Important Disclaimer:</strong> This analysis is generated by an AI model and is for informational purposes only. It is not legal advice. Always consult with a qualified legal professional for specific guidance regarding terms and conditions or any legal matters.
+            </p>
+        </div>
+
+        <div id="errorMessage" class="w-full hidden error-message px-5 py-4 rounded-lg relative mt-8" role="alert">
+            <strong class="font-bold">Analysis Error!</strong>
+            <span class="block sm:inline ml-2" id="errorText">Something went wrong. Please try again or check your input.</span>
+        </div>
+    </div>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        const termsInput = document.getElementById('termsInput');
+        const analyzeButton = document.getElementById('analyzeButton');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const resultsArea = document.getElementById('resultsArea');
+        const analysisContent = document.getElementById('analysisContent');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+        const themeToggle = document.getElementById('themeToggle');
+        const htmlElement = document.documentElement;
+        
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const fileProcessing = document.getElementById('fileProcessing');
+        const processingText = document.getElementById('processingText');
+        const fileSuccess = document.getElementById('fileSuccess');
+        const successText = document.getElementById('successText');
+        const clearFile = document.getElementById('clearFile');
+
+        let currentFileText = null;
+
+        function waitForMarked() {
+            return new Promise((resolve) => {
+                if (typeof marked !== 'undefined') {
+                    resolve();
+                } else {
+                    setTimeout(() => waitForMarked().then(resolve), 100);
+                }
+            });
+        }
+        
+        dropzone.addEventListener('click', () => {
+            if (!dropzone.classList.contains('processing')) {
+                fileInput.click();
+            }
+        });
+
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+
+        dropzone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileUpload(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileUpload(e.target.files[0]);
+            }
+        });
+
+        clearFile.addEventListener('click', () => {
+            clearFileData();
+        });
+
+        function clearFileData() {
+            currentFileText = null;
+            fileSuccess.classList.add('hidden');
+            fileInput.value = '';
+            termsInput.value = '';
+            resultsArea.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+        }
+
+        async function handleFileUpload(file) {
+            const allowedTypes = ['text/plain', 'application/pdf'];
+            const maxSize = 10 * 1024 * 1024;
+
+            if (!allowedTypes.includes(file.type)) {
+                displayError('Invalid file type. Please upload only PDF or text files (.pdf, .txt).');
+                return;
+            }
+
+            if (file.size > maxSize) {
+                displayError('File too large. Please upload files smaller than 10MB.');
+                return;
+            }
+
+            dropzone.classList.add('processing');
+            fileProcessing.classList.remove('hidden');
+            fileSuccess.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+
+            try {
+                let extractedText = '';
+
+                if (file.type === 'application/pdf') {
+                    processingText.textContent = 'Extracting text from PDF...';
+                    extractedText = await extractTextFromPDF(file);
+                } else if (file.type === 'text/plain') {
+                    processingText.textContent = 'Reading text file...';
+                    extractedText = await readTextFile(file);
+                }
+
+                if (extractedText.trim()) {
+                    currentFileText = extractedText;
+                    termsInput.value = extractedText;
+                    
+                    fileProcessing.classList.add('hidden');
+                    successText.textContent = `Successfully loaded ${file.name} (${Math.round(file.size / 1024)} KB)`;
+                    fileSuccess.classList.remove('hidden');
+                } else {
+                    throw new Error('No text could be extracted from the file.');
+                }
+
+            } catch (error) {
+                console.error('File processing error:', error);
+                displayError(`Failed to process file: ${error.message}`);
+            } finally {
+                dropzone.classList.remove('processing');
+                fileProcessing.classList.add('hidden');
+            }
+        }
+
+        async function readTextFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = () => reject(new Error('Failed to read text file'));
+                reader.readAsText(file);
+            });
+        }
+
+        async function extractTextFromPDF(file) {
+            return new Promise(async (resolve, reject) => {
+                try {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                    let fullText = '';
+
+                    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                        processingText.textContent = `Processing PDF page ${pageNum} of ${pdf.numPages}...`;
+                        
+                        const page = await pdf.getPage(pageNum);
+                        const textContent = await page.getTextContent();
+                        const pageText = textContent.items.map(item => item.str).join(' ');
+                        fullText += pageText + '\n\n';
+                    }
+
+                    resolve(fullText.trim());
+                } catch (error) {
+                    reject(new Error('Failed to extract text from PDF: ' + error.message));
+                }
+            });
+        }
+
+        function setTheme(theme) {
+            htmlElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            if (theme === 'dark') {
+                themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
+            } else {
+                themeToggle.innerHTML = '<i class="fa-solid fa-moon"></i>';
+            }
+        }
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            setTheme(savedTheme);
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            setTheme('dark');
+        } else {
+            setTheme('light');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = htmlElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            setTheme(newTheme);
+        });
+
+        function validateInput() {
+            const termsText = termsInput.value.trim();
+            if (!termsText) {
+                termsInput.classList.add('error');
+                setTimeout(() => {
+                    termsInput.classList.remove('error');
+                }, 500);
+                return false;
+            }
+            return true;
+        }
+
+        termsInput.addEventListener('input', () => {
+            termsInput.classList.remove('error');
+            errorMessage.classList.add('hidden');
+        });
+
+        analyzeButton.addEventListener('click', analyzeTerms);
+
+        async function analyzeTerms() {
+            if (!validateInput()) {
+                displayError("Please upload a file or paste the Terms and Conditions text to analyze.");
+                return;
+            }
+
+            const termsText = termsInput.value.trim();
+
+            resultsArea.classList.remove('animate-slide-in-top');
+            errorMessage.classList.remove('animate-slide-in-bottom');
+            resultsArea.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+            analysisContent.innerHTML = '';
+
+            loadingIndicator.classList.remove('hidden');
+            analyzeButton.disabled = true;
+            analyzeButton.innerHTML = '<div class="loading-spinner"></div> Analyzing...';
+
+            try {
+                await waitForMarked();
+
+                let chatHistory = [];
+                const prompt = `Analyze the following Terms and Conditions text and identify the most critical clauses that could be considered 'hidden', 'unfavorable', 'restrictive', or 'uncommon' for a typical user. Focus on providing actionable insights rather than exhaustive explanations.
+
+                Specifically, highlight clauses related to:
+                - **Data Usage & Privacy:** Any broad permissions for data collection, sharing with third parties without clear opt-out, or use for marketing beyond the service's core function.
+                - **Arbitration & Class Action Waiver:** Clauses that force disputes into arbitration and waive the right to participate in class-action lawsuits.
+                - **Auto-Renewal & Cancellation:** Difficult or non-obvious auto-renewal mechanisms, or complex cancellation processes.
+                - **Limitation of Liability:** Clauses that severely limit the company's responsibility for damages or service failures, especially if unusually broad.
+                - **Intellectual Property Rights:** If the company claims extensive, perpetual, or royalty-free rights to user-generated content.
+                - **Changes to Terms:** Clauses allowing the company to unilaterally change terms without adequate notice or user consent.
+                - **Termination Rights:** If the company can terminate your account without cause, notice, or refund.
+                - **Indemnification:** Clauses where you agree to protect the company from liabilities arising from your use, even if the company is partly at fault.
+
+                For each identified critical clause, provide:
+                1.  A concise, bolded title/summary of the clause (e.g., "**Automatic Arbitration Clause**").
+                2.  The exact text of the clause from the original document, enclosed in a code block (if easily identifiable, otherwise a very close paraphrase).
+                3.  A brief, actionable insight explaining *why* it's important for the user to pay attention to it and its potential impact. Use clear, direct language.
+
+                Format the output clearly using Markdown, with a main heading "Key Insights & Attention Points" followed by a list of the identified clauses. If no significant hidden or unfavorable clauses are found, state clearly and briefly why the terms seem standard.
+
+                Terms and Conditions Text:
+                ${termsText}
+                `;
+
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+                const payload = { contents: chatHistory };
+                const apiKey = "AIzaSyALC6uGKCz0knma6wx_oz1KhAxAtx0KLl4";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorDetail = await response.json();
+                    const apiErrorMessage = errorDetail.error && errorDetail.error.message ? errorDetail.error.message : JSON.stringify(errorDetail);
+                    throw new Error(`API Error: ${response.status} ${response.statusText} - ${apiErrorMessage}`);
+                }
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const aiResponseText = result.candidates[0].content.parts[0].text;
+                    analysisContent.innerHTML = marked.parse(aiResponseText);
+                    resultsArea.classList.remove('hidden');
+                    resultsArea.classList.add('animate-slide-in-top');
+                } else {
+                    displayError("No valid analysis found. The AI might not have generated a response or the response structure was unexpected.");
+                }
+
+            } catch (error) {
+                console.error("Error analyzing terms:", error);
+                let userFriendlyError = "An unexpected error occurred during analysis. Please try again.";
+                if (error.message.includes("API Error")) {
+                    userFriendlyError = `There was an issue with the AI service: ${error.message.split(' - ')[1] || 'Please check your input or try again later.'}`;
+                } else if (error.message.includes("Failed to fetch")) {
+                    userFriendlyError = "Network error: Could not connect to the analysis service. Please check your internet connection.";
+                } else if (error.message.includes("marked is not defined")) {
+                    userFriendlyError = "Loading error: Please refresh the page and try again.";
+                }
+                displayError(userFriendlyError);
+            } finally {
+                loadingIndicator.classList.add('hidden');
+                analyzeButton.disabled = false;
+                analyzeButton.innerHTML = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 002-2v2m-2 2h2m-2 2h2m-2 2h2m-2 2h2m-2 2h2"></path></svg> Get Key Insights';
+            }
+        }
+
+        function displayError(message) {
+            errorText.textContent = message;
+            errorMessage.classList.remove('hidden');
+            errorMessage.classList.add('animate-slide-in-bottom');
+            resultsArea.classList.add('hidden');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            waitForMarked().then(() => {
+                console.log('App initialized successfully');
+            });
+        });
+    </script>
+</body>
+</html>
